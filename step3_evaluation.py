@@ -9,8 +9,8 @@ import numpy
 from PIL import Image
 from PIL import ImageFilter
 
-image_path = "./test_images/truck.jpg"  #指定测试图片
-input_number = 9                       #指定测试图片编号（0-9）
+image_path = "./test_images/ship.jpg"  #指定测试图片
+input_number = 8                      #指定测试图片编号（0-9）
 
 image_size = 24
 labels = ['飞机','汽车','鸟','猫','麋鹿','狗','青蛙','马','轮船','卡车',]
@@ -127,8 +127,11 @@ prediction = tf.nn.softmax(h_fc2)
 
 #############################################
 image = Image.open(image_path)
-image = image.resize((32,32),Image.ANTIALIAS)
-image = image.filter(ImageFilter.DETAIL)
+
+if (image.size != (32,32)):
+    image = image.resize((32,32),Image.ANTIALIAS)
+    image = image.filter(ImageFilter.DETAIL)
+
 #image.save('./test_images/cat3_0_0.jpg')
 image = numpy.reshape(image, [1, 32, 32, 3])
 image = numpy.multiply(image, 1.0 / 255.0)
