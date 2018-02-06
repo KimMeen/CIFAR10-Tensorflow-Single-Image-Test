@@ -4,6 +4,6 @@ Used to test single imgae file(step3-evaluation.py) or a batch of image files(st
 
 The test accuracy and training loss chart:
 
-![Test_Accuracy](http://github.com/KimMeen/CIFAR10-Tensorflow-Single-Image-Test/raw/master/Test_accuracy.png)
+![Test_Accuracy](https://github.com/KimMeen/CIFAR10-Tensorflow-Single-Image-Test/raw/master/Test_accuracy.png)
 
-![Training_Loss](http://github.com/KimMeen/CIFAR10-Tensorflow-Single-Image-Test/raw/master/training_loss.png)
+![Training_Loss](https://github.com/KimMeen/CIFAR10-Tensorflow-Single-Image-Test/raw/master/training_loss.png)
