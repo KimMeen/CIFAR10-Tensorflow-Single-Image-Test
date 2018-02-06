@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Ming JIN
+"""
 
 def readLines(file_path):
     with open(file_path, 'r') as T:

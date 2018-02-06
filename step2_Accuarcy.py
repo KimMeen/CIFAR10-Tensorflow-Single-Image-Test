@@ -1,10 +1,12 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+@author: Ming JIN
+"""
 
 import tensorflow as tf
 import numpy
-from PIL import Image
-from tensorflow.python.platform import gfile
+#from PIL import Image
+#from tensorflow.python.platform import gfile
 import icifar10
 
 cifar10 = icifar10.read_data_sets('./cifar-10/')
@@ -95,7 +97,7 @@ weight_decay3 = tf.multiply(tf.nn.l2_loss(W_conv3), 1e-4)
 tf.add_to_collection('losses', weight_decay3)
 b_conv3 = bias_variable([256])
 h_conv3 = tf.nn.relu(conv_batch_normal(conv2d(norm2, W_conv3),b_conv3,256))
-h_pool3 = max_pool_2x2(h_conv3)                          # output size 4x4x256
+h_pool3 = max_pool_2x2(h_conv3)
 norm3 = tf.nn.local_response_normalization(h_pool3, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 ## fc1 layer ##
@@ -124,5 +126,4 @@ with tf.Session() as sess:
    print("Model has been restored.\n")
    batch_xs, batch_ys = cifar10.test.next_batch(9999, shuffle=True, flip=False, whiten=True, noise=False,crop=False,crop_test=True)
    print(compute_accuracy(batch_xs, batch_ys))
-   #print(compute_accuracy(cifar10.test.images, cifar10.test.labels))
 

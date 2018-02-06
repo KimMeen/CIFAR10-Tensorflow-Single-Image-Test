@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Ming JIN
+"""
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -22,15 +27,9 @@ def read_data_sets(data_dir,
 
     TRAIN = os.path.join(data_dir, "train", "train.txt")
     TEST = os.path.join(data_dir, "test", "test.txt")
-    # from tensorflow.examples.tutorials.mnist import input_data
-    # train and test from images and txt labels
+
     train_images, train_labels = process_images(TRAIN, one_hot=one_hot)
     test_images, test_labels = process_images(TEST, one_hot=one_hot)
-
-    #if not 0 <= validation_size <= len(train_images):
-    #    raise ValueError(
-    #        'Validation size should be between 0 and {}. Received: {}.'
-    #            .format(len(train_images), validation_size))
 
     validation_images = train_images[:validation_size]
     validation_labels = train_labels[:validation_size]
@@ -54,7 +53,7 @@ def read_data_sets(data_dir,
 
 def process_images(label_file, one_hot, num_classes=10):
     if file.getFileName(label_file) == 'train.txt':
-        images = numpy.empty((50000, 3072)) #原来是1024，改成3072
+        images = numpy.empty((50000, 3072)) 
         labels = numpy.empty(50000)
     if file.getFileName(label_file) == 'test.txt':
         images = numpy.empty((10000, 3072))
@@ -66,7 +65,6 @@ def process_images(label_file, one_hot, num_classes=10):
     print(len(label_record))
     index = 0
     for name in label_record:
-        # print label_record[name]
         image = Image.open(image_dir + str(label_record[name]) + '/' + name)
         if index % 100 == 0:
             print("processing %d: " % index + image_dir + str(label_record[name]) + '/' + name)
@@ -82,7 +80,7 @@ def process_images(label_file, one_hot, num_classes=10):
     cols = 32
     
     if one_hot:
-      return images.reshape(num_images, rows, cols, 3), dense_to_one_hot(numpy.array(labels, dtype=numpy.uint8), num_classes) #use this one
+      return images.reshape(num_images, rows, cols, 3), dense_to_one_hot(numpy.array(labels, dtype=numpy.uint8), num_classes)
   
     return images.reshape(num_images, rows, cols, 3), numpy.array(labels, dtype=numpy.uint8)
 
@@ -134,14 +132,11 @@ class DataSet(object):
       assert images.shape[0] == labels.shape[0], ('images.shape: %s labels.shape: %s' % (images.shape, labels.shape))
       self._num_examples = images.shape[0]
 
-      # Convert shape from [num examples, rows, columns, depth]
-      # to [num examples, rows*columns] (assuming depth == 1)
       if reshape:
-        assert images.shape[3] == 3   #原来是1，改成了3
-        images = images.reshape(images.shape[0], images.shape[1], images.shape[2], images.shape[3]) #加乘了一个images.shape[3]
+        assert images.shape[3] == 3
+        images = images.reshape(images.shape[0], images.shape[1], images.shape[2], images.shape[3])
       
       if dtype == dtypes.float32:
-        # Convert from [0, 255] -> [0.0, 1.0].
         images = images.astype(numpy.float32)
         images = numpy.multiply(images, 1.0 / 255.0)
     
@@ -175,17 +170,8 @@ class DataSet(object):
 
   def next_batch(self, batch_size, shuffle, flip, whiten, noise, crop, crop_test):
     """Return the next `batch_size` examples from this data set."""
-    #if fake_data:
-    #  fake_image = [1] * 3072  #原来是1024，改成3072
-    #  if self.one_hot:
-    #    fake_label = [1] + [0] * 9
-    #  else:
-    #    fake_label = 0
-    #  return [fake_image for _ in range(batch_size)], [
-    #      fake_label for _ in range(batch_size)
-    #  ]
         
-    start = self._index_in_epoch #上一次batch个图片的最后一张图片下边，从这里开始
+    start = self._index_in_epoch
     
     # Shuffle for the first epoch
     if self._epochs_completed == 0 and start == 0 and shuffle:
@@ -221,20 +207,16 @@ class DataSet(object):
  
       if crop:
          images_crop_1 = images_new_part
-         #self._images[start:end] = self._image_crop(images_crop)
          self._images_new_part_cut = self._image_crop(images_crop_1)
          
          images_crop_2 = images_rest_part
-         #self._images[start:end] = self._image_crop(images_crop)
          self._images_rest_part_cut = self._image_crop(images_crop_2)
          
       if crop_test:
          images_crop_1 = images_new_part
-         #self._images[start:end] = self._image_crop(images_crop)
          self._images_new_part_cut_test = self._image_test_crop(images_crop_1)
          
          images_crop_2 = images_rest_part
-         #self._images[start:end] = self._image_crop(images_crop)
          self._images_rest_part_cut_test = self._image_test_crop(images_crop_2) 
          
       if flip:
@@ -273,12 +255,10 @@ class DataSet(object):
       
       if crop:
          images_crop = self._images[start:end]
-         #self._images[start:end] = self._image_crop(images_crop)
          self._cut_images = self._image_crop(images_crop)
 
       if crop_test:
          images_crop = self._images[start:end]
-         #self._images[start:end] = self._image_crop(images_crop)
          self._cut_test_images = self._image_test_crop(images_crop)
           
       if flip:
@@ -343,7 +323,6 @@ class DataSet(object):
             old_image = images[i,:,:,:]
             
             if numpy.random.random() < 0.5:
-                #new_image_mid = numpy.fliplr(old_image.reshape(32,32,3))
                 new_image = cv2.flip(old_image, 1)
             else:
                 new_image = old_image

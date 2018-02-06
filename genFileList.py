@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Ming JIN
+"""
+
 import os
 
 img_root = "./cifar-10/"
@@ -39,6 +44,5 @@ def files_labels2txt():
 
 
 if __name__ == "__main__":
-    #get_label(img_root + "mnist_test/0/")
-    #gen_label_file(img_root + "mnist_test/0/")
+
     files_labels2txt()

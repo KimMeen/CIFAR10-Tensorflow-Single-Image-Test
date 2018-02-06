@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+@author: Ming JIN
+"""
+
 import tensorflow as tf
 import icifar10
 import numpy
@@ -38,26 +43,11 @@ def bias_variable(shape):
     return tf.Variable(initial)
 
 def conv2d(x, W):
-    # stride [1, x_movement, y_movement, 1]
-    # Must have strides[0] = strides[3] = 1
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-
-#def conv_batch_normal(x,b,n_filter):
-#    epsilon = 1e-4
-#    gamma = tf.Variable(initial_value=tf.constant(1.0, shape=[n_filter]))
-#    mean, variance = tf.nn.moments(x, axes=[0, 1, 2], keep_dims=False)
-#    return tf.nn.batch_normalization(x, mean, variance, b, gamma, epsilon)
-
-#def fc_batch_normal(x,b,hidden_dim):
-#    epsilon = 1e-4
-#    gamma = tf.Variable(initial_value=tf.constant(1.0, shape=[hidden_dim]))
-#    mean, variance = tf.nn.moments(x, axes=[0])
-#    return tf.nn.batch_normalization(x, mean, variance, b, gamma, epsilon)    
 
 def conv_batch_normal(x,b,n_filter,is_train=1):
     epsilon = 1e-5
     gamma = tf.Variable(initial_value=tf.constant(1.0, shape=[n_filter]),trainable=True)
-    #axises = numpy.arange(len(x.shape) - 1)
     batch_mean, batch_var = tf.nn.moments(x, axes=[0, 1, 2], name='moments')
     ema = tf.train.ExponentialMovingAverage(decay=0.5)
   
@@ -73,7 +63,6 @@ def conv_batch_normal(x,b,n_filter,is_train=1):
 def fc_batch_normal(x,b,hidden_dim,is_train=1):
     epsilon = 1e-5
     gamma = tf.Variable(initial_value=tf.constant(1.0, shape=[hidden_dim]),trainable=True)
-    #axises = numpy.arange(len(x.shape) - 1)
     batch_mean, batch_var = tf.nn.moments(x, axes=[0], name='moments')
     ema = tf.train.ExponentialMovingAverage(decay=0.5)
   
@@ -87,52 +76,46 @@ def fc_batch_normal(x,b,hidden_dim,is_train=1):
     return tf.nn.batch_normalization(x, mean, variance, b, gamma, epsilon) 
 
 def max_pool_2x2(x):
-    # stride [1, x_movement, y_movement, 1]
     return tf.nn.max_pool(x, ksize=[1,2,2,1], strides=[1,2,2,1], padding='SAME')
 
+
 # define placeholder for inputs to network
-xs = tf.placeholder(tf.float32, [None, image_size, image_size, 3])   # 32*32
+xs = tf.placeholder(tf.float32, [None, image_size, image_size, 3]) 
 ys = tf.placeholder(tf.float32, [None, 10])
 keep_prob = tf.placeholder(tf.float32)
-#x_image = tf.reshape(xs, [-1, 32, 32, 3])
-# print(x_image.shape)  # [n_samples, 28,28,1]
+
 
 ## conv1 layer ##
-W_conv1 = conv_weight_variable([3,3,3,64],[image_size,image_size,3]) # patch 3x3, in size 3, out size 64
+W_conv1 = conv_weight_variable([3,3,3,64],[image_size,image_size,3])
 weight_decay1 = tf.multiply(tf.nn.l2_loss(W_conv1), 1e-4)
 tf.add_to_collection('losses', weight_decay1)
 b_conv1 = bias_variable([64])
-#h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1) # output size 32x32x64
 h_conv1 = tf.nn.relu(conv_batch_normal(conv2d(xs, W_conv1),b_conv1,64)) 
-h_pool1 = max_pool_2x2(h_conv1)                          # output size 16x16x64  
+h_pool1 = max_pool_2x2(h_conv1)                         
 norm1 = tf.nn.local_response_normalization(h_pool1, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 ## conv2 layer ##
-W_conv2 = conv_weight_variable([3,3,64,128],[int(image_size/2),int(image_size/2),64]) # patch 3x3, in size 64, out size 128
+W_conv2 = conv_weight_variable([3,3,64,128],[int(image_size/2),int(image_size/2),64]) 
 weight_decay2 = tf.multiply(tf.nn.l2_loss(W_conv2), 1e-4)
 tf.add_to_collection('losses', weight_decay2)
 b_conv2 = bias_variable([128])
-#h_conv2 = tf.nn.relu(conv2d(norm1, W_conv2) + b_conv2)   # output size 16x16x128
 h_conv2 = tf.nn.relu(conv_batch_normal(conv2d(norm1, W_conv2),b_conv2,128))
-h_pool2 = max_pool_2x2(h_conv2)                          # output size 8x8x128
+h_pool2 = max_pool_2x2(h_conv2)
 norm2 = tf.nn.local_response_normalization(h_pool2, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 ## conv3 layer ##
-W_conv3 = conv_weight_variable([3,3,128,256],[int(image_size/4),int(image_size/4),128]) # patch 3x3, in size 128, out size 256
+W_conv3 = conv_weight_variable([3,3,128,256],[int(image_size/4),int(image_size/4),128]) 
 weight_decay3 = tf.multiply(tf.nn.l2_loss(W_conv3), 1e-4)
 tf.add_to_collection('losses', weight_decay3)
 b_conv3 = bias_variable([256])
-#h_conv3 = tf.nn.relu(conv2d(norm2, W_conv3) + b_conv3)   # output size 8x8x256
 h_conv3 = tf.nn.relu(conv_batch_normal(conv2d(norm2, W_conv3),b_conv3,256))
-h_pool3 = max_pool_2x2(h_conv3)                          # output size 4x4x256
+h_pool3 = max_pool_2x2(h_conv3)                        
 norm3 = tf.nn.local_response_normalization(h_pool3, depth_radius=4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
 ## fc1 layer ##
 W_fc1 = fc_weight_variable([int(image_size/8)*int(image_size/8)*256, 1024])
 b_fc1 = bias_variable([1024])
-# [n_samples, 7, 7, 64] ->> [n_samples, 7*7*64]
 h_norm3_flat = tf.reshape(norm3, [-1,int(image_size/8)*int(image_size/8)*256])
-#intermediate_fc1 = tf.matmul(h_norm3_flat, W_fc1) + b_fc1
 intermediate_fc1 = fc_batch_normal(tf.matmul(h_norm3_flat, W_fc1),b_fc1,1024)
 h_fc1_drop = tf.nn.dropout(intermediate_fc1, keep_prob)
 h_fc1 = tf.nn.relu(h_fc1_drop)
@@ -140,20 +123,15 @@ h_fc1 = tf.nn.relu(h_fc1_drop)
 ## fc2 layer ##
 W_fc2 = fc_weight_variable([1024, 10])
 b_fc2 = bias_variable([10])
-# [n_samples, 7, 7, 64] ->> [n_samples, 7*7*64]
-#h_fc1_flat = tf.reshape(h_fc1, [-1,1024])
 intermediate_fc2 = tf.matmul(h_fc1, W_fc2) + b_fc2
 h_fc2 = intermediate_fc2
 
 ## softmax logic layer ##
- #W_fc2 = weight_variable([3072, 10])
- #b_fc2 = bias_variable([10])
 prediction = tf.nn.softmax(h_fc2)
 
 
 # the error between prediction and real data
-#cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(prediction + 1e-10),reduction_indices=[1]))  # loss//方法1
-cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=h_fc2, labels=ys))  # loss//方法2
+cross_entropy = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=h_fc2, labels=ys))
 tf.add_to_collection('losses', cross_entropy)
 
 avg_loss = tf.add_n(tf.get_collection('losses'))
@@ -191,10 +169,6 @@ for i in range(iterration):
     
     if i % 100 == 0:
         batch_xt, batch_yt = cifar10.test.next_batch(1280, shuffle=True, flip=False, whiten=True, noise=False,crop=False,crop_test=True)
-        #batch_xv, batch_yv = cifar10.train.next_batch(1280, shuffle=True, flip=False, whiten=True, noise=False,crop=False,crop_test=True)
-        #print(cifar10.test.images.shape, cifar10.test.labels.shape)
-        #print(compute_accuracy(cifar10.test.images, cifar10.test.labels))
-        #print("Validation Accuracy:",compute_accuracy(batch_xv, batch_yv))
         
         Test_Accuracy = compute_accuracy(batch_xt, batch_yt)
         acc_mat.append(Test_Accuracy)
