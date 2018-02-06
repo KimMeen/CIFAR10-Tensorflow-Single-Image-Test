@@ -7,3 +7,12 @@ The test accuracy and training loss chart:
 ![Test_Accuracy](https://github.com/KimMeen/CIFAR10-Tensorflow-Single-Image-Test/raw/master/Test_accuracy.png)
 
 ![Training_Loss](https://github.com/KimMeen/CIFAR10-Tensorflow-Single-Image-Test/raw/master/training_loss.png)
+
+important files list:
+1.genFileList.py - used to create 'train.txt' and 'test.txt'.
+2.icifar10.py - used to import training and testing data,include some data enhancement functions.
+3.step1_classification.py - structure of network and used to train the model.
+4.step2_Accuarcy.py - used all of the test data to evaluate the accuarcy of network.
+3.step3_evaluation.py - used model to test single image file,which in the test_images folder.
+
+
